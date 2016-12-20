@@ -18,9 +18,9 @@ else
     # based on this image
     for i in /opt/mariadb/pre-init.d/*sh
     do
-    	if [ -e "${i}" ]; then
+    	if [ -f "${i}" ]; then
     		echo "[i] pre-init.d - processing $i"
-    		. "${i}"
+    		/bin/sh "${i}"
     	fi
     done
 
@@ -64,9 +64,9 @@ EOF
     # based on this image
     for i in /opt/mariadb/post-init.d/*sh
     do
-    	if [ -e "${i}" ]; then
+    	if [ -f "${i}" ]; then
     		echo "[i] post-init.d - processing $i"
-    		. "${i}"
+    		/bin/sh "${i}"
     	fi
     done
 fi
@@ -75,9 +75,9 @@ fi
 # based on this image
 for i in /opt/mariadb/pre-exec.d/*sh
 do
-	if [ -e "${i}" ]; then
+	if [ -f "${i}" ]; then
 		echo "[i] pre-exec.d - processing $i"
-		. ${i}
+		/bin/sh "${i}"
 	fi
 done
 
