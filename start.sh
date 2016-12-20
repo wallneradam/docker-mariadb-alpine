@@ -1,15 +1,5 @@
 #!/bin/sh
 
-# execute any pre-init scripts, useful for images
-# based on this image
-for i in /scripts/pre-init.d/*sh
-do
-	if [ -e "${i}" ]; then
-		echo "[i] pre-init.d - processing $i"
-		. "${i}"
-	fi
-done
-
 if [ ! -d "/run/mysqld" ]; then
 	mkdir -p /run/mysqld
 	chown -R mysql:mysql /run/mysqld
@@ -23,6 +13,16 @@ else
 	chown -R mysql:mysql /var/lib/mysql
 
 	mysql_install_db --user=mysql > /dev/null
+
+    # execute any pre-init scripts, useful for images
+    # based on this image
+    for i in /opt/mariadb/pre-init.d/*sh
+    do
+    	if [ -e "${i}" ]; then
+    		echo "[i] pre-init.d - processing $i"
+    		. "${i}"
+    	fi
+    done
 
 	if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
 		MYSQL_ROOT_PASSWORD=`pwgen 16 1`
@@ -63,7 +63,7 @@ fi
 
 # execute any pre-exec scripts, useful for images
 # based on this image
-for i in /scripts/pre-exec.d/*sh
+for i in /opt/mariadb/pre-exec.d/*sh
 do
 	if [ -e "${i}" ]; then
 		echo "[i] pre-exec.d - processing $i"
