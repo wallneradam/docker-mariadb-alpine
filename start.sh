@@ -59,6 +59,16 @@ EOF
 
 	/usr/bin/mysqld --user=mysql --bootstrap --verbose=0 < $tfile
 	rm -f $tfile
+
+	# execute any post-init scripts, useful for images
+    # based on this image
+    for i in /opt/mariadb/post-init.d/*sh
+    do
+    	if [ -e "${i}" ]; then
+    		echo "[i] post-init.d - processing $i"
+    		. "${i}"
+    	fi
+    done
 fi
 
 # execute any pre-exec scripts, useful for images

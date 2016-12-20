@@ -6,8 +6,9 @@ ADD my.cnf /etc/mysql/my.cnf
 
 RUN apk add --no-cache mysql mysql-client pwgen \
     && mkdir -p /etc/mysql/conf.d \
-    && mkdir -p /opt/mariadb/pre-exec.d \
     && mkdir -p /opt/mariadb/pre-init.d \
+    && mkdir -p /opt/mariadb/post-init.d \
+    && mkdir -p /opt/mariadb/pre-exec.d \
     && chmod -R 755 /opt/mariadb
 
 EXPOSE 3306

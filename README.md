@@ -38,4 +38,5 @@ All files in this directory will be included and all configurations in them will
 
 You can create init scripts by mounting a volume into
 - /opt/mariadb/pre-init.d : All .sh scripts in this directory will be executed before 1st time initialization (database creation)
+- /opt/mariadb/post-init.d : All .sh scripts in this directory will be executed after 1st time initialization (database creation)
 - /opt/mariadb/pre-exec.d : All .sh scripts in this directory will be executed before every start of MariaDB server
