@@ -1,4 +1,4 @@
-# MariaDB (MySQL) image on Alpine Linux
+# MariaDB 10.2 (MySQL 5.7) Docker image on Alpine Linux
 
 ## Docker image usage
 
@@ -6,18 +6,19 @@
 docker run [docker-options] pickapp/mariadb-alpine
 ```
 
-Note that MySQL root will be randomly generated (using pwgen).
+Note that MySQL root password will be randomly generated (using pwgen).
 Root password will be displayed, during first run using output similar to this:
 ```
 [i] MySQL root Password: XXXXXXXXXXXXXXX
 ```
 
 But you don't need root password. If you connect locally, it should not
-ask you for password, so you can use following procedure:
+ask you for a password, so you can use following procedure:
 ```
 docker exec -ti mariadb_containerid /bin/sh
 # mysql -u root mysql
 ```
+This way you can add any user as well.
 
 ## Examples
 
