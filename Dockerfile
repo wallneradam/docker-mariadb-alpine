@@ -1,39 +1,99 @@
 FROM alpine:3.4
 MAINTAINER Adam Wallner <wallner@bitbaro.hu>
 
+# The version numbers to download and build
 ENV MARIADB_VER 10.2.2
+ENV JUDY_VER 1.0.5
 
 ADD start.sh /opt/mariadb/start.sh
-ADD my.cnf /etc/mysql/my.cnf
 
-RUN apk add --no-cache \
-    # Install utils
-    pwgen openssl ca-certificates \
-    # Install MariaDB build deps
-    alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev jemalloc-dev linux-headers bison \
-    # Download and unpack
-    && wget -O /tmp/mdb.tar.gz https://downloads.mariadb.org/interstitial/mariadb-${MARIADB_VER}/source/mariadb-${MARIADB_VER}.tar.gz \
-    && cd /tmp && tar -xf mdb.tar.gz \
-    # Build
-    && cd /tmp/mariadb-${MARIADB_VER} \
-    && cmake . -DBUILD_CONFIG=mysql_release -DWITHOUT_TOKUDB=1 \
+RUN \
+    # Install packages
+    apk add --no-cache \
+        # Install utils
+        pwgen openssl ca-certificates \
+        # Installing needed libs
+        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost \
+        # Install MariaDB build deps
+        alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
+    # Add group and user for mysql
+    && addgroup -S -g 500 mysql \
+    && adduser -S -D -H -u 500 -G mysql -g "MySQL" mysql \
+    # Download and unpack mariadb
+    && mkdir -p /opt/src \
+    && mkdir -p /etc/mysql \
+    && wget -O /opt/src/mdb.tar.gz https://downloads.mariadb.org/interstitial/mariadb-${MARIADB_VER}/source/mariadb-${MARIADB_VER}.tar.gz \
+    && cd /opt/src && tar -xf mdb.tar.gz && rm mdb.tar.gz \
+    # Download and unpack Judy (needed for OQGraph)
+    && wget -O /opt/src/judy.tar.gz http://downloads.sourceforge.net/project/judy/judy/Judy-${JUDY_VER}/Judy-${JUDY_VER}.tar.gz \
+    && cd /opt/src && tar -xf judy.tar.gz && rm judy.tar.gz \
+    # Build Judy
+    && cd /opt/src/judy-${JUDY_VER} \
+    && ./configure && make && make install \
+    # Build maridb
+    && cd /opt/src/mariadb-${MARIADB_VER} \
+    && cmake . -DBUILD_CONFIG=mysql_release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+		-DSYSCONFDIR=/etc/mysql \
+		-DMYSQL_DATADIR=/var/lib/mysql \
+		-DMYSQL_UNIX_ADDR=/run/mysqld/mysqld.sock \
+		-DDEFAULT_CHARSET=utf8 \
+		-DDEFAULT_COLLATION=utf8_general_ci \
+		-DENABLED_LOCAL_INFILE=ON \
+		-DINSTALL_INFODIR=share/mysql/docs \
+		-DINSTALL_MANDIR=share/man \
+		-DINSTALL_PLUGINDIR=lib/mysql/plugin \
+		-DINSTALL_SCRIPTDIR=bin \
+		-DINSTALL_INCLUDEDIR=include/mysql \
+		-DINSTALL_DOCREADMEDIR=share/mysql \
+		-DINSTALL_SUPPORTFILESDIR=share/mysql \
+		-DINSTALL_MYSQLSHAREDIR=share/mysql \
+		-DINSTALL_DOCDIR=share/mysql/docs \
+		-DINSTALL_SHAREDIR=share/mysql \
+		-DWITH_READLINE=ON \
+		-DWITH_ZLIB=system \
+		-DWITH_SSL=system \
+		-DWITH_LIBWRAP=OFF \
+		-DWITH_JEMALLOC=no \
+		-DWITH_EXTRA_CHARSETS=complex \
+		-DWITH_EMBEDDED_SERVER=ON \
+		-DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+		-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+		-DWITH_INNOBASE_STORAGE_ENGINE=1 \
+		-DWITH_PARTITION_STORAGE_ENGINE=1 \
+		-DPLUGIN_TOKUDB=NO \
+        -DPLUGIN_OQGRAPH=YES \
+		-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
+		-DWITHOUT_FEDERATED_STORAGE_ENGINE=1 \
+		-DWITHOUT_PBXT_STORAGE_ENGINE=1 \
     && make \
     # Install
     && make install \
+    # Copy default config, and remove deprecates and not working things
+    && cp /usr/share/mysql/my-large.cnf /etc/mysql/my.cnf \
+    && echo "!includedir /etc/mysql/conf.d/" >>/etc/mysql/my.cnf \
+    && sed -i '/# Try number of CPU/d' /etc/mysql/my.cnf \
+    && sed -i '/thread_concurrency = 8/d' /etc/mysql/my.cnf \
+    && sed -i '/innodb_additional_mem_pool_size/d' /etc/mysql/my.cnf \
+    && sed -i 's/log-bin=/#log-bin=/' /etc/mysql/my.cnf \
+    && sed -i 's/binlog_format=/#binlog_format=/' /etc/mysql/my.cnf \
+    && sed -i 's/#innodb_/innodb_/' /etc/mysql/my.cnf \
     # Clean everything
-    && rm -rf /tmp/* \
+    && rm -rf /opt/src \
+    # Remove packages
     && apk del \
-    # Remove unneeded utils
-    openssl ca-certificates \
-    # Remove no more necessary build dependencies
-    alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev jemalloc-dev linux-headers bison \
-
+        # Remove no more necessary build dependencies
+        alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
     # Create needed directories
-    && mkdir -p /etc/mysql/conf.d \
+    && mkdir -p /var/lib/mysql \
+    && mkdir -p /run/mysqld \
+    && mkdir /etc/mysql/conf.d \
     && mkdir -p /opt/mariadb/pre-init.d \
     && mkdir -p /opt/mariadb/post-init.d \
     && mkdir -p /opt/mariadb/pre-exec.d \
     # Set permissions
+    && chown -R mysql:mysql /var/lib/mysql \
+    && chown -R mysql:mysql /run/mysqld\
     && chmod -R 755 /opt/mariadb
 
 EXPOSE 3306
