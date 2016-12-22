@@ -29,10 +29,16 @@ RUN \
     && cd /opt/src && tar -xf judy.tar.gz && rm judy.tar.gz \
     # Build Judy
     && cd /opt/src/judy-${JUDY_VER} \
-    && ./configure && make && make install \
+    && CFLAGS="-O2 -s" CXXFLAGS="-O2 -s" ./configure \
+    && make \
+    && make install \
     # Build maridb
+    && mkdir -p /tmp/_ \
     && cd /opt/src/mariadb-${MARIADB_VER} \
-    && cmake . -DBUILD_CONFIG=mysql_release \
+    && cmake . \
+        -DCMAKE_BUILD_TYPE=MinSizeRel \
+        -DCOMMON_C_FLAGS="-O2 -s -fno-omit-frame-pointer -pipe" \
+        -DCOMMON_CXX_FLAGS="-O2 -s -fno-omit-frame-pointer -pipe" \
         -DCMAKE_INSTALL_PREFIX=/usr \
 		-DSYSCONFDIR=/etc/mysql \
 		-DMYSQL_DATADIR=/var/lib/mysql \
@@ -41,14 +47,14 @@ RUN \
 		-DDEFAULT_COLLATION=utf8_general_ci \
 		-DENABLED_LOCAL_INFILE=ON \
 		-DINSTALL_INFODIR=share/mysql/docs \
-		-DINSTALL_MANDIR=share/man \
+		-DINSTALL_MANDIR=/tmp/_/share/man \
 		-DINSTALL_PLUGINDIR=lib/mysql/plugin \
 		-DINSTALL_SCRIPTDIR=bin \
-		-DINSTALL_INCLUDEDIR=include/mysql \
-		-DINSTALL_DOCREADMEDIR=share/mysql \
+		-DINSTALL_INCLUDEDIR=/tmp/_/include/mysql \
+		-DINSTALL_DOCREADMEDIR=/tmp/_/share/mysql \
 		-DINSTALL_SUPPORTFILESDIR=share/mysql \
 		-DINSTALL_MYSQLSHAREDIR=share/mysql \
-		-DINSTALL_DOCDIR=share/mysql/docs \
+		-DINSTALL_DOCDIR=/tmp/_/share/mysql/docs \
 		-DINSTALL_SHAREDIR=share/mysql \
 		-DWITH_READLINE=ON \
 		-DWITH_ZLIB=system \
@@ -56,16 +62,20 @@ RUN \
 		-DWITH_LIBWRAP=OFF \
 		-DWITH_JEMALLOC=no \
 		-DWITH_EXTRA_CHARSETS=complex \
-		-DWITH_EMBEDDED_SERVER=ON \
-		-DWITH_ARCHIVE_STORAGE_ENGINE=1 \
-		-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
-		-DWITH_INNOBASE_STORAGE_ENGINE=1 \
-		-DWITH_PARTITION_STORAGE_ENGINE=1 \
+		-DPLUGIN_ARCHIVE=STATIC \
+        -DPLUGIN_BLACKHOLE=DYNAMIC \
+        -DPLUGIN_INNOBASE=STATIC \
+        -DPLUGIN_PARTITION=DYNAMIC \
 		-DPLUGIN_TOKUDB=NO \
-        -DPLUGIN_OQGRAPH=YES \
+        -DPLUGIN_FEEDBACK=NO \
+        -DPLUGIN_OQGRAPH=STATIC \
+        -DPLUGIN_FEDERATEDX=NO \
 		-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
-		-DWITHOUT_FEDERATED_STORAGE_ENGINE=1 \
 		-DWITHOUT_PBXT_STORAGE_ENGINE=1 \
+        -DWITH_EMBEDDED_SERVER=OFF \
+        -DWITH_UNIT_TESTS=OFF \
+        -DENABLED_PROFILING=OFF \
+        -DENABLE_DEBUG_SYNC=OFF \
     && make \
     # Install
     && make install \
@@ -80,6 +90,7 @@ RUN \
     && sed -i 's/#innodb_/innodb_/' /etc/mysql/my.cnf \
     # Clean everything
     && rm -rf /opt/src \
+    && rm -rf /tmp/_ \
     # Remove packages
     && apk del \
         # Remove no more necessary build dependencies
