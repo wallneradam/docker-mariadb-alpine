@@ -37,8 +37,8 @@ RUN \
     && cd /opt/src/mariadb-${MARIADB_VER} \
     && cmake . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
-        -DCOMMON_C_FLAGS="-O2 -s -fno-omit-frame-pointer -pipe" \
-        -DCOMMON_CXX_FLAGS="-O2 -s -fno-omit-frame-pointer -pipe" \
+        -DCOMMON_C_FLAGS="-O3 -s -fno-omit-frame-pointer -pipe" \
+        -DCOMMON_CXX_FLAGS="-O3 -s -fno-omit-frame-pointer -pipe" \
         -DCMAKE_INSTALL_PREFIX=/usr \
 		-DSYSCONFDIR=/etc/mysql \
 		-DMYSQL_DATADIR=/var/lib/mysql \
@@ -69,8 +69,10 @@ RUN \
         -DPLUGIN_CONNECT=NO \
 		-DPLUGIN_TOKUDB=NO \
         -DPLUGIN_FEEDBACK=NO \
-        -DPLUGIN_OQGRAPH=STATIC \
+        -DPLUGIN_OQGRAPH=YES \
+        -DPLUGIN_FEDERATED=NO \
         -DPLUGIN_FEDERATEDX=NO \
+        -DWITHOUT_FEDERATED_STORAGE_ENGINE=1 \
 		-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
 		-DWITHOUT_PBXT_STORAGE_ENGINE=1 \
         -DWITH_EMBEDDED_SERVER=OFF \
@@ -92,8 +94,15 @@ RUN \
     # Clean everything
     && rm -rf /opt/src \
     && rm -rf /tmp/_ \
+    && rm -rf /usr/sql-bench \
+    && rm -rf /usr/mysql-test \
+    && rm -rf /usr/data \
+    && rm -rf /usr/lib/python2.7 \
+    && rm -rf /usr/bin/mysql_client_test \
+    && rm -rf /usr/bin/mysqltest \
     # Remove packages
     && apk del \
+        ca-certificates \
         # Remove no more necessary build dependencies
         alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
     # Create needed directories

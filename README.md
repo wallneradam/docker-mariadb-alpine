@@ -46,4 +46,4 @@ You can create init scripts by mounting a volume into
 
 - No TokuDB is compiled because it has GLIBC dependencies
 - Partition and blackhole storage engines are loadable dynamic plugins
-- It has OQGraph storage engine as well for graph computing (statically compiled)
+- It has OQGraph storage engine as well for graph computing
