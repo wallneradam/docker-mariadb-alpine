@@ -2,7 +2,7 @@ FROM alpine:3.4
 MAINTAINER Adam Wallner <wallner@bitbaro.hu>
 
 # The version numbers to download and build
-ENV MARIADB_VER 10.2.2
+ENV MARIADB_VER 10.2.3
 ENV JUDY_VER 1.0.5
 
 ADD start.sh /opt/mariadb/start.sh
