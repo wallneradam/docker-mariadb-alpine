@@ -11,7 +11,7 @@ RUN \
     # Install packages
     apk add --no-cache \
         # Install utils
-        pwgen openssl ca-certificates \
+        pwgen openssl ca-certificates coreutils \
         # Installing needed libs
         libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost \
         # Install MariaDB build deps
