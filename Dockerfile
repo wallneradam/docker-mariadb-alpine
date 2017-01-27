@@ -8,12 +8,14 @@ ENV JUDY_VER 1.0.5
 ADD start.sh /opt/mariadb/start.sh
 
 RUN \
+    # Add testing repo
+    echo http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
     # Install packages
     apk add --no-cache \
         # Install utils
         pwgen openssl ca-certificates \
         # Installing needed libs
-        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost \
+        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost libgeos proj4 geos \
         # Install MariaDB build deps
         alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
     # Add group and user for mysql
