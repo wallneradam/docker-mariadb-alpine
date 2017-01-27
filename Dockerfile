@@ -1,4 +1,4 @@
-FROM alpine:3.4
+FROM alpine:3.5
 MAINTAINER Adam Wallner <wallner@bitbaro.hu>
 
 # The version numbers to download and build
@@ -11,7 +11,7 @@ RUN \
     # Install packages
     apk add --no-cache \
         # Install utils
-        pwgen openssl ca-certificates coreutils \
+        pwgen openssl ca-certificates \
         # Installing needed libs
         libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost \
         # Install MariaDB build deps
