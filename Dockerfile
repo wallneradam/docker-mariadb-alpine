@@ -15,7 +15,7 @@ RUN \
         # Install utils
         pwgen openssl ca-certificates \
         # Installing needed libs
-        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost libgeos proj4 geos \
+        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost proj4 geos \
         # Install MariaDB build deps
         alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
     # Update CA certs
