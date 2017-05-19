@@ -2,14 +2,15 @@ FROM alpine:3.4
 MAINTAINER Adam Wallner <wallner@bitbaro.hu>
 
 # The version numbers to download and build
-ENV MARIADB_VER 10.2.3
+ENV MARIADB_VER 10.2.5
 ENV JUDY_VER 1.0.5
 
 ADD start.sh /opt/mariadb/start.sh
 
 RUN \
+    export CPU=`cat /proc/cpuinfo | grep -c processor` \
     # Add testing repo
-    echo http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
+    && echo http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
     # Install packages
     && apk add --no-cache \
         # Install utils
@@ -83,9 +84,9 @@ RUN \
         -DWITH_UNIT_TESTS=OFF \
         -DENABLED_PROFILING=OFF \
         -DENABLE_DEBUG_SYNC=OFF \
-    && make \
+    && make -j${CPU} \
     # Install
-    && make install \
+    && make -j${CPU} install \
     # Copy default config, and remove deprecates and not working things
     && cp /usr/share/mysql/my-large.cnf /etc/mysql/my.cnf \
     && echo "!includedir /etc/mysql/conf.d/" >>/etc/mysql/my.cnf \
