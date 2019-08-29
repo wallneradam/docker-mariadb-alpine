@@ -1,11 +1,12 @@
-FROM alpine:3.4
+FROM alpine:3.10
 MAINTAINER Adam Wallner <wallner@bitbaro.hu>
 
 # The version numbers to download and build
-ENV MARIADB_VER 10.2.5
+ENV MARIADB_VER 10.4.7
 ENV JUDY_VER 1.0.5
 
 ADD start.sh /opt/mariadb/start.sh
+ADD my-large.cnf /usr/share/mysql/my-large.cnf
 
 RUN \
     export CPU=`cat /proc/cpuinfo | grep -c processor` \
@@ -16,7 +17,7 @@ RUN \
         # Install utils
         pwgen openssl ca-certificates \
         # Installing needed libs
-        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost proj4 geos \
+        libstdc++ libaio gnutls ncurses-libs libcurl libxml2 boost proj geos \
         # Install MariaDB build deps
         alpine-sdk cmake ncurses-dev gnutls-dev curl-dev libxml2-dev libaio-dev linux-headers bison boost-dev \
     # Update CA certs

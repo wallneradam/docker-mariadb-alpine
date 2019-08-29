@@ -1,6 +1,6 @@
 #!/bin/bash
 NAME="pickapp/mariadb-alpine"
-VERSION=10.2.5
+VERSION=10.4.7
 
 docker rmi -f ${NAME}:${VERSION} 2>/dev/null
 docker rmi -f ${NAME}:latest 2>/dev/null

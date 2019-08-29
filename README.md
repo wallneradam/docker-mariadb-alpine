@@ -1,4 +1,4 @@
-# MariaDB 10.2 (MySQL 5.7) Docker image on Alpine Linux
+# MariaDB 10.4.7 (MySQL 5.7) Docker image on Alpine Linux
 
 ## Docker image usage
 
@@ -25,7 +25,7 @@ This way you can add any user as well.
 Typical usage:
 
 ```
-docker run -ti -v /host/dir/for/db:/var/lib/mysql -e MYSQL_DATABASE=db -e MYSQL_USER=user -e MYSQL_PASSWORD=blah k0st/alpine-mariadb
+docker run -ti -v /host/dir/for/db:/var/lib/mysql -e MYSQL_DATABASE=db -e MYSQL_USER=user -e MYSQL_PASSWORD=blah pickapp/alpine-mariadb
 ```
 
 ## Configuration
