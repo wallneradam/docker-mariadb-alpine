@@ -27,13 +27,16 @@ else
   tfile=$(mktemp)
 
   cat <<EOF >"$tfile"
-USE mysql;
+DELETE FROM mysql.user WHERE host = '$(hostname)';
+DELETE FROM mysql.proxies_priv WHERE host = '$(hostname)';
 FLUSH PRIVILEGES;
 CREATE USER 'root'@'%' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD";
+CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD";
+CREATE USER 'root'@'::1' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD";
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
-ALTER USER 'root'@'localhost' IDENTIFIED BY '';
-FLUSH PRIVILEGES;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'::1' WITH GRANT OPTION;
+ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY '';
+ALTER USER 'root'@'::1' IDENTIFIED BY '';
 EOF
 
   if [ "$MYSQL_DATABASE" != "" ]; then
@@ -46,13 +49,12 @@ EOF
     echo "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >>"$tfile"
 
     if [ "$MYSQL_DATABASE" != "" ]; then
-      echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >>"$tfile"
+      echo "GRANT ALL PRIVILEGES ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%';" >>"$tfile"
     fi
-
-    echo "FLUSH PRIVILEGES;" >>"$tfile"
   fi
+  echo "FLUSH PRIVILEGES;" >>"$tfile"
 
-  /usr/bin/mysqld --defaults-file=/etc/mysql/my.cnf --console --user=mysql --bootstrap <"$tfile"
+  /usr/bin/mysqld --defaults-file=/etc/mysql/my.cnf --console --user=mysql --bootstrap <"$tfile" || exit 1
   rm -f "$tfile"
 
   # Execute any post-init scripts, useful for images
