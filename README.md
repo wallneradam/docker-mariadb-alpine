@@ -1,4 +1,4 @@
-# MariaDB 10.4.7 (MySQL 5.7) Docker image on Alpine Linux
+# MariaDB 10.4.8 (MySQL 5.7) Docker image on Alpine Linux
 
 ## Docker image usage
 
