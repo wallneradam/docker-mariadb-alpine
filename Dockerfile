@@ -82,6 +82,8 @@ RUN \
     -DWITH_UNIT_TESTS=OFF \
     -DENABLED_PROFILING=OFF \
     -DENABLE_DEBUG_SYNC=OFF \
+    -DDEFAULT_CHARSET=utf8mb4 \
+    -DDEFAULT_COLLATION=utf8mb4_unicode_ci \
     && make -j${CPU} \
     # Install
     && make -j${CPU} install \
