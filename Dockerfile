@@ -1,12 +1,9 @@
 FROM alpine:3.10
-MAINTAINER Adam Wallner <wallner@bitbaro.hu>
+MAINTAINER Adam Wallner <adam.wallner@gmail.com>
 
 # The version numbers to download and build
-ENV MARIADB_VER 10.4.7
+ENV MARIADB_VER 10.4.8
 ENV JUDY_VER 1.0.5
-
-ADD start.sh /opt/mariadb/start.sh
-ADD my-large.cnf /usr/share/mysql/my-large.cnf
 
 RUN \
     export CPU=`cat /proc/cpuinfo | grep -c processor` \
@@ -88,15 +85,6 @@ RUN \
     && make -j${CPU} \
     # Install
     && make -j${CPU} install \
-    # Copy default config, and remove deprecates and not working things
-    && cp /usr/share/mysql/my-large.cnf /etc/mysql/my.cnf \
-    && echo "!includedir /etc/mysql/conf.d/" >>/etc/mysql/my.cnf \
-    && sed -i '/# Try number of CPU/d' /etc/mysql/my.cnf \
-    && sed -i '/thread_concurrency = 8/d' /etc/mysql/my.cnf \
-    && sed -i '/innodb_additional_mem_pool_size/d' /etc/mysql/my.cnf \
-    && sed -i 's/log-bin=/#log-bin=/' /etc/mysql/my.cnf \
-    && sed -i 's/binlog_format=/#binlog_format=/' /etc/mysql/my.cnf \
-    && sed -i 's/#innodb_/innodb_/' /etc/mysql/my.cnf \
     # Clean everything
     && rm -rf /opt/src \
     && rm -rf /tmp/_ \
@@ -122,11 +110,18 @@ RUN \
     && chown -R mysql:mysql /var/lib/mysql \
     && chown -R mysql:mysql /run/mysqld \
     && chmod -R 755 /opt/mariadb \
-    # Patching mysql_install_db, we don't have PAM plugin
+    # Patching mysql_install_db: we don't have PAM plugin
     && sed -i 's/^.*auth_pam_tool_dir.*$/#auth_pam_tool_dir not exists/' /usr/bin/mysql_install_db
 
+# Copy config into the image
+ADD my.cnf /etc/mysql/my.cnf
+
+# Default port
 EXPOSE 3306
 
+# The data volume
 VOLUME ["/var/lib/mysql"]
 
+# The entrypoint
+ADD start.sh /opt/mariadb/start.sh
 ENTRYPOINT ["/opt/mariadb/start.sh"]

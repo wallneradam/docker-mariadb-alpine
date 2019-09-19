@@ -33,6 +33,7 @@ CREATE USER 'root'@'%' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD";
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 ALTER USER 'root'@'localhost' IDENTIFIED BY '';
+FLUSH PRIVILEGES;
 EOF
 
   if [ "$MYSQL_DATABASE" != "" ]; then
@@ -47,6 +48,8 @@ EOF
     if [ "$MYSQL_DATABASE" != "" ]; then
       echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >>"$tfile"
     fi
+
+    echo "FLUSH PRIVILEGES;" >>"$tfile"
   fi
 
   /usr/bin/mysqld --defaults-file=/etc/mysql/my.cnf --console --user=mysql --bootstrap <"$tfile"
