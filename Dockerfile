@@ -46,8 +46,6 @@ RUN \
     -DSYSCONFDIR=/etc/mysql \
     -DMYSQL_DATADIR=/var/lib/mysql \
     -DMYSQL_UNIX_ADDR=/run/mysqld/mysqld.sock \
-    -DDEFAULT_CHARSET=utf8 \
-    -DDEFAULT_COLLATION=utf8_general_ci \
     -DENABLED_LOCAL_INFILE=ON \
     -DINSTALL_INFODIR=share/mysql/docs \
     -DINSTALL_MANDIR=/tmp/_/share/man \
